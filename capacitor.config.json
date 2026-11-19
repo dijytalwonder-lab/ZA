@@ -1,0 +1,12 @@
+{
+  "appId": "com.dijytal.lastcommute",
+  "appName": "Zombie Apocalypse: The Last Commute",
+  "webDir": "dist",
+  "backgroundColor": "#05010f",
+  "android": {
+    "allowMixedContent": false
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

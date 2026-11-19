@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#05010f" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>ZOMBIE APOCALYPSE: THE LAST COMMUTE</title>
+  <script>
+    // Diagnostics that run BEFORE the game bundle, so even a crash while the bundle loads is visible on screen.
+    window.__stage = 'html parsed';
+    (function () {
+      function log(m) {
+        var e = document.getElementById('errlog');
+        if (!e) return;
+        e.style.display = 'block';
+        e.textContent = (e.textContent + '\n' + m).slice(-2200);
+      }
+      window.addEventListener('error', function (ev) {
+        log('ERR: ' + ev.message + ' @' + String(ev.filename || '').split('/').pop() + ':' + ev.lineno + ':' + ev.colno);
+      });
+      window.addEventListener('unhandledrejection', function (ev) {
+        log('PROMISE: ' + ((ev.reason && ev.reason.stack) || ev.reason));
+      });
+      document.addEventListener('DOMContentLoaded', function () {
+        var t = document.getElementById('loadtxt');
+        if (t) t.textContent = 'PAGE OK - STARTING GAME SCRIPT...';
+      });
+      setTimeout(function () {
+        if (!window.__gameBoot) log('GAME SCRIPT NEVER STARTED (blocked or failed to load). stage=' + window.__stage);
+      }, 3500);
+      setTimeout(function () {
+        if (!window.__gameReady) log('STILL LOADING after 12 s. last step: ' + window.__stage);
+      }, 12000);
+    })();
+  </script>
+</head>
+<body>
+  <div id="app">
+    <canvas id="c"></canvas>
+    <div id="lookzone"></div>
+    <div id="fxlayer"></div>
+
+    <!-- ================= HUD ================= -->
+    <div id="hud" class="hidden">
+      <div id="joyzone"><div id="joybase"><div id="joyknob"></div></div></div>
+
+      <div id="topleft" class="panel">
+        <div class="bar hp"><span id="hpfill"></span><i>HEALTH</i><b id="hptxt">100</b></div>
+        <div class="bar st"><span id="stfill"></span><i>STAMINA</i></div>
+        <div id="coins"><em>&#9670;</em> <b id="coinstxt">0</b></div>
+      </div>
+
+      <div id="objective" class="panel">
+        <div id="objtitle"></div>
+        <ul id="objlist"></ul>
+      </div>
+
+      <div id="topright">
+        <div id="mapwrap"><canvas id="minimap" width="240" height="240"></canvas></div>
+        <div id="topbtns">
+          <button id="btn-inv" class="mini" aria-label="Inventory">&#9638;</button>
+          <button id="btn-pause" class="mini" aria-label="Pause">II</button>
+        </div>
+        <div id="weapon" class="panel" data-act="switch"><span id="wname">FISTS</span><span id="wammo"></span><span id="wmats"></span><small>TAP TO SWITCH</small></div>
+      </div>
+
+      <div id="fps" class="hidden"></div>
+      <div id="chapterTag"></div>
+      <div id="stealth" class="hidden"></div>
+      <div id="prompt" class="hidden"></div>
+
+      <div id="buttons">
+        <button class="gbtn big" data-act="attack" id="b-attack"><span>ATTACK</span></button>
+        <button class="gbtn" data-act="jump"><span>JUMP</span></button>
+        <button class="gbtn combat" data-act="dodge"><span>DODGE</span></button>
+        <button class="gbtn combat" data-act="block"><span>BLOCK</span></button>
+        <button class="gbtn combat" data-act="shoot" id="b-shoot"><span>THROW</span><small id="shootcount"></small></button>
+        <button class="gbtn act hidden" data-act="interact" id="b-interact"><span>USE</span></button>
+        <button class="gbtn tgl" data-act="run"><span>RUN</span></button>
+        <button class="gbtn tgl" data-act="crouch"><span>CROUCH</span></button>
+        <button class="gbtn med hidden" data-act="medkit" id="b-med"><span>MEDKIT</span><small id="medcount"></small></button>
+      </div>
+    </div>
+
+    <div id="dialogue" class="hidden panel"><b id="dspeaker"></b><p id="dtext"></p></div>
+    <div id="toasts"></div>
+    <div id="banner" class="hidden"><h1 id="bt"></h1><p id="bs"></p></div>
+    <div id="mg" class="hidden"></div>
+
+    <!-- ================= MENUS ================= -->
+    <div id="menu" class="screen hidden">
+      <div class="menu-left">
+        <div class="logo">
+          <div class="logo-top">&#9656; SURVIVE THE NIGHT</div>
+          <h1 class="glitch" data-text="ZOMBIE APOCALYPSE">ZOMBIE APOCALYPSE</h1>
+          <div class="logo-sub">THE LAST COMMUTE</div>
+        </div>
+      </div>
+      <div class="menu-right">
+        <div id="menu-main" class="menu-list">
+          <button class="mbtn" id="m-story"><i>01</i>STORY MODE</button>
+          <button class="mbtn" id="m-continue"><i>02</i>CONTINUE<small id="m-cont-sub"></small></button>
+          <button class="mbtn" id="m-new"><i>03</i>NEW GAME</button>
+          <button class="mbtn" id="m-char"><i>04</i>CHARACTER SELECTION</button>
+          <button class="mbtn" id="m-settings"><i>05</i>SETTINGS</button>
+        </div>
+        <div id="menu-sub" class="menu-sub hidden"></div>
+      </div>
+      <div class="menu-foot">v0.4 &middot; ALL 7 CHAPTERS PLAYABLE<br><span style="font-size:9px;letter-spacing:2px;color:rgba(0,240,255,0.55)">PC: WASD MOVE &middot; DRAG MOUSE = LOOK &middot; E USE &middot; F ATTACK &middot; K THROW &middot; Q DODGE &middot; R BLOCK &middot; C CROUCH &middot; V RUN &middot; H MEDKIT &middot; ESC PAUSE</span></div>
+    </div>
+
+    <div id="pause" class="screen hidden">
+      <div class="pause-box panel">
+        <h2>PAUSED</h2>
+        <div id="pause-main" class="menu-list">
+          <button class="mbtn" id="p-resume">RESUME</button>
+          <button class="mbtn" id="p-inv">INVENTORY</button>
+          <button class="mbtn" id="p-settings">SETTINGS</button>
+          <button class="mbtn" id="p-restart">RESTART CHECKPOINT</button>
+          <button class="mbtn" id="p-quit">MAIN MENU</button>
+        </div>
+        <div id="pause-sub" class="hidden"></div>
+      </div>
+    </div>
+
+    <div id="death" class="screen hidden">
+      <div class="death-box">
+        <h2 class="glitch" data-text="SIGNAL LOST">SIGNAL LOST</h2>
+        <p>You didn't make it.</p>
+        <button class="mbtn" id="d-retry">RETRY FROM CHECKPOINT</button>
+        <button class="mbtn" id="d-quit">MAIN MENU</button>
+      </div>
+    </div>
+
+    <div id="end" class="screen hidden">
+      <div class="death-box">
+        <h2 class="glitch" data-text="TO BE CONTINUED">TO BE CONTINUED</h2>
+        <p id="end-sub">CHAPTER 4 COMPLETE</p>
+        <p class="end-next" id="end-next">NEXT: CHAPTER 5 &middot; ZOMBIE APOCALYPSE IN THE CITY</p>
+        <button class="mbtn hidden" id="e-next">NEXT CHAPTER</button>
+        <button class="mbtn" id="e-menu">MAIN MENU</button>
+      </div>
+    </div>
+
+    <div id="fade"></div>
+    <div id="fx-damage"></div>
+    <div id="fx-red"></div>
+    <div id="fx-scan"></div>
+    <div id="fx-vignette"></div>
+
+    <div id="loading">
+      <div class="logo"><h1 class="glitch" data-text="ZOMBIE APOCALYPSE">ZOMBIE APOCALYPSE</h1><div class="logo-sub">THE LAST COMMUTE</div></div>
+      <div id="loadbar"><span id="loadfill"></span></div>
+      <p id="loadtxt">BOOTING CITY GRID...</p>
+    </div>
+    <div id="rotate" class="hidden"><p>ROTATE YOUR DEVICE</p><small>ZOMBIE APOCALYPSE: THE LAST COMMUTE is played in landscape</small></div>
+    <div id="errlog"></div>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
