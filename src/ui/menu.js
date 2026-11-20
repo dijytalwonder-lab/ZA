@@ -251,7 +251,7 @@ export class UI {
     const mats = el('p', '', MATS.map((m) => `${m.name} <b>${inv[m.key]}</b>`).join(' &nbsp;·&nbsp; '));
     mats.style.cssText = 'font:700 12px Orbitron;color:#00f0ff;letter-spacing:1px;margin:0 0 8px';
     c.appendChild(mats);
-    const g = el('div', 'inv-grid');
+    const g = el('div', 'inv-grid craft');
     for (const r of RECIPES) {
       const why = whyNot(inv, r);
       const d = el('div', 'inv-item' + (why ? ' off' : ''), `${r.name}<small>${costText(r)} · ${r.desc}</small>`);

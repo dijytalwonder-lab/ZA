@@ -4,6 +4,16 @@ const OUTFIT_KEY = 'lastcommute.outfit.v1';
 
 export const DEFAULT_SETTINGS = { quality: 'med', music: 0.6, sfx: 0.85, sens: 1, invertY: false, fps: false, haptics: true };
 
+// First run on a weak phone (4 cores or fewer, 3 GB or less): start on LOW graphics. Anything the player has saved wins over this.
+function deviceDefaults() {
+  try {
+    const touch = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
+    const weak = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 3;
+    if (touch && weak) return Object.assign({}, DEFAULT_SETTINGS, { quality: 'low' });
+  } catch (e) { /* use the plain defaults */ }
+  return DEFAULT_SETTINGS;
+}
+
 function read(key) {
   try {
     const s = localStorage.getItem(key);
@@ -16,7 +26,7 @@ function write(key, v) {
 
 export const Save = {
   loadSettings() {
-    return Object.assign({}, DEFAULT_SETTINGS, read(SET_KEY) || {});
+    return Object.assign({}, deviceDefaults(), read(SET_KEY) || {});
   },
   saveSettings(s) { write(SET_KEY, s); },
   load() { return read(SAVE_KEY); },

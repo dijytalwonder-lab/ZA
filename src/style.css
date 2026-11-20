@@ -267,3 +267,94 @@ input[type='range'] { width: 150px; accent-color: var(--pink); touch-action: pan
 @media (orientation: portrait) and (max-width: 700px) {
   #rotate { display: flex !important; }
 }
+
+/* ---------------- phones: short landscape screens ----------------
+   Everything is sized from the screen height so the touch buttons, the info panels and the dialogue never sit on top of each other
+   (800x360, 640x360, 844x390, 915x412, 932x430 are the common phone sizes; 640x300 is the squeeze test). */
+@media (max-height: 440px) {
+  :root { --bs: clamp(44px, 15vh, 60px); --bb: calc(var(--bs) * 1.45); --bt: calc(var(--bs) * 0.9); --ba: calc(var(--bs) * 1.2); --map: clamp(72px, 24vh, 98px); --g: 8px; }
+
+  /* top left: health, then a short objectives list (finished objectives are hidden) */
+  #topleft { width: 176px; padding: 5px 8px 4px; }
+  .bar { height: 13px; margin-bottom: 4px; }
+  #coins { font-size: 11px; }
+  #objective { top: calc(74px + var(--st)); width: 190px; padding: 5px 8px; }
+  #objtitle { font-size: 9px; letter-spacing: 1.5px; }
+  #objlist { margin-top: 2px; font-size: 12px; line-height: 1.2; max-height: 5.4em; overflow: hidden; }
+  #objlist li { padding-left: 14px; margin: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #objlist li.done { display: none; }
+
+  /* top right: weapon | menu buttons | minimap in one row, so the lower right stays free for the action buttons */
+  #topright { width: auto; flex-direction: row; align-items: flex-start; justify-content: flex-end; gap: 6px; }
+  #mapwrap { order: 3; width: var(--map); height: var(--map); }
+  #topbtns { order: 2; flex-direction: column; gap: 4px; }
+  .mini { width: 40px; height: 38px; }
+  #weapon { order: 1; width: 124px; padding: 4px 6px; }
+  #weapon small { display: none; }
+  #wname { font-size: 10px; letter-spacing: 0.5px; }
+  #wammo { font-size: 10px; }
+  #wmats { font-size: 8px; letter-spacing: 0.5px; }
+  #stealth { padding: 2px 10px; font-size: 10px; letter-spacing: 2px; }
+
+  /* action buttons: attack in the corner, the rest in an arc around it, nothing under the info panels */
+  .gbtn { width: var(--bs); height: var(--bs); }
+  .gbtn span { font-size: 8px; }
+  .gbtn small { font-size: 9px; }
+  .gbtn.big { width: var(--bb); height: var(--bb); }
+  .gbtn.big span { font-size: 11px; }
+  .gbtn.act { width: var(--ba); height: var(--ba); }
+  .gbtn.act span { font-size: 11px; }
+  .gbtn.tgl { width: var(--bt); height: var(--bt); }
+  #b-attack { right: calc(14px + var(--sr)); bottom: calc(12px + var(--sb)); }
+  [data-act='jump'] { right: calc(14px + var(--bb) + var(--g) + var(--sr)); bottom: calc(12px + var(--sb)); }
+  [data-act='shoot'] { right: calc(14px + var(--bb) + var(--g) + var(--sr)); bottom: calc(12px + var(--bs) + var(--g) + var(--sb)); }
+  [data-act='dodge'] { right: calc(14px + (var(--bb) - var(--bs)) / 2 + var(--sr)); bottom: calc(12px + var(--bb) + var(--g) + var(--sb)); }
+  [data-act='block'] { right: calc(14px + var(--bb) + var(--g) + var(--bs) + var(--g) + var(--sr)); bottom: calc(12px + var(--bs) / 2 + var(--sb)); }
+  #b-interact { right: calc(14px + (var(--bb) - var(--ba)) / 2 + var(--sr)); bottom: calc(12px + var(--bb) + var(--g) + var(--bs) + var(--g) + var(--sb)); }
+  [data-act='run'] { left: calc(12px + var(--sl)); bottom: calc(12px + var(--sb)); }
+  [data-act='crouch'] { left: calc(12px + var(--sl)); bottom: calc(12px + var(--bt) + var(--g) + var(--sb)); }
+  #b-med { left: calc(12px + var(--sl)); bottom: calc(12px + (var(--bt) + var(--g)) * 2 + var(--sb)); }
+  #joyzone { left: calc(76px + var(--sl)); }
+  #joybase { width: 100px; height: 100px; margin: -50px 0 0 -50px; left: calc(116px + var(--sl)); top: calc(100% - 74px - var(--sb)); }
+  #joyknob { width: 46px; height: 46px; margin: -23px 0 0 -23px; }
+
+  /* dialogue sits between the stick and the buttons; the prompt floats above both */
+  #dialogue { left: calc(150px + var(--sl)); right: calc(14px + var(--bb) + var(--g) + var(--bs) + var(--g) + var(--bs) + 6px + var(--sr)); bottom: calc(8px + var(--sb)); width: auto; transform: none; padding: 5px 10px 6px; }
+  #dspeaker { font-size: 9px; }
+  #dtext { font-size: 13px; line-height: 1.2; }
+  #prompt { bottom: calc(14px + var(--bb) + var(--g) + var(--sb)); font-size: 12px; padding: 5px 12px; }
+  .toast { font-size: 11px; padding: 3px 12px; }
+
+  /* menus and panels */
+  .menu-left { padding-top: 3vh; }
+  .menu-list { gap: 6px; }
+  .mbtn { padding: 8px 14px 8px 46px; font-size: 14px; }
+  .menu-sub { max-height: 94vh; padding: 10px 12px; }
+  .menu-sub h2, .pause-box h2 { font-size: 14px; letter-spacing: 4px; margin: 0 0 6px; }
+  .chapter { padding: 6px 10px; margin: 5px 0; }
+  .chapter b { font-size: 17px; width: 28px; }
+  .chapter div small { font-size: 11px; line-height: 1.2; }
+  .row { margin: 6px 0; flex-wrap: wrap; row-gap: 4px; }
+  .outfit { padding: 6px 8px; margin: 4px 0; }
+  .pause-box { width: min(94vw, 620px); padding: 10px 14px; max-height: 94vh; }
+  .inv-grid { grid-template-columns: repeat(3, 1fr); gap: 5px; }
+  .inv-grid.craft { grid-template-columns: repeat(2, 1fr); }
+  .inv-item { padding: 5px 8px; font-size: 11px; }
+  .inv-item small { font-size: 11px; line-height: 1.15; }
+  .inv-item .mgbtn { margin-top: 4px; padding: 5px 16px; font-size: 11px; }
+  .death-box { gap: 6px; }
+  .death-box h2 { font-size: clamp(24px, 11vh, 44px); }
+}
+@media (max-height: 440px) and (max-width: 700px) {
+  #weapon { width: 108px; }
+  #wname { font-size: 9px; }
+  #wmats { font-size: 7px; letter-spacing: 0; }
+}
+
+/* ---------------- touch devices ---------------- */
+.pause-box { touch-action: pan-y; -webkit-overflow-scrolling: touch; }
+.touch .menu-foot span { display: none; }
+.touch .seg button { min-height: 38px; padding: 8px 12px; }
+.touch .chapter .go { min-height: 40px; padding: 10px 14px; }
+.touch .outfit { min-height: 48px; }
+.touch input[type='range'] { height: 28px; }

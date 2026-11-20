@@ -248,6 +248,7 @@ function frame(now) {
           const avg = accT / accN;
           accT = 0; accN = 0;
           if (avg > 0.037 && G.scale > 0.6) { G.scale = Math.max(0.6, G.scale - 0.15); resize(); }
+          else if (avg > 0.037 && G.useBloom) { G.useBloom = false; G.hud.toast('PERFORMANCE MODE', 'gold'); } // already at the lowest resolution: drop the bloom pass too
           else if (avg < 0.019 && G.scale < 1) { G.scale = Math.min(1, G.scale + 0.1); resize(); }
         }
       }
@@ -267,6 +268,7 @@ async function boot() {
   setLoad(8, 'BOOTING CITY GRID...');
   await sleep(30);
   mark('boot: settings');
+  try { if (window.matchMedia('(pointer: coarse)').matches) document.documentElement.classList.add('touch'); } catch (e) { /* no media queries: treat as a desktop */ }
   G.settings = Save.loadSettings();
   G.scale = 1;
   G.basePR = 1;

@@ -23,6 +23,7 @@ async function launch(o = {}) {
   const errors = [];
   page.on('pageerror', (e) => errors.push('PAGEERROR: ' + e.message));
   page.on('console', (m) => { if (m.type() === 'error') errors.push('CONSOLE.ERROR: ' + m.text()); });
+  if (o.init) await page.evaluateOnNewDocument(o.init, o.initArg); // runs before the game script (e.g. to fake navigator.hardwareConcurrency); the function is serialised, so pass values via initArg
   if (o.settings) {
     await page.evaluateOnNewDocument((s) => { try { if (!localStorage.getItem('lastcommute.settings.v1')) localStorage.setItem('lastcommute.settings.v1', JSON.stringify(s)); } catch (e) {} }, o.settings);
   }
