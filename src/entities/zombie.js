@@ -48,6 +48,8 @@ export class Zombie {
     this.invest = null;
     this.searching = false;
     this.searchT = 0;
+    this.invBest = 1e9; // closest it has got to the investigate spot, and how long it has made no progress (blocked by scenery)
+    this.invStall = 0;
     this.loseT = 0;
     this.sniffT = 0;
     this.spitCd = rand(1, 2.5);
@@ -110,6 +112,7 @@ export class Zombie {
         this.state = 'investigate';
         this.invest = { x, z };
         this.searching = false;
+        this.invBest = 1e9; this.invStall = 0;
         this.alert = Math.max(this.alert, 0.3);
       }
       return;
@@ -278,7 +281,11 @@ export class Zombie {
       case 'investigate': {
         if (this._detect(stage, pl, dist, dx, dz, dt)) { this._spot(stage, pl); break; }
         const ix = this.invest.x - this.pos.x, iz = this.invest.z - this.pos.z, id = Math.hypot(ix, iz);
-        if (!this.searching && id > 1.1) {
+        if (!this.searching) {
+          // a zombie pressed against a car or wall gives up walking after a couple of seconds and just searches where it stands
+          if (id < this.invBest - 0.4) { this.invBest = id; this.invStall = 0; } else this.invStall += dt;
+        }
+        if (!this.searching && id > 1.1 && this.invStall < 2.5) {
           mvx = (ix / id) * t.speed * 0.9; mvz = (iz / id) * t.speed * 0.9;
           speedShown = t.speed * 0.9;
           this.yaw = dampAngle(this.yaw, Math.atan2(ix, iz), 6, dt);
@@ -325,6 +332,7 @@ export class Zombie {
             this.invest = { x: this.lastSeen.x, z: this.lastSeen.z };
             this.aware = false;
             this.searching = false;
+            this.invBest = 1e9; this.invStall = 0;
             this.alert = 0.4;
             this.loseT = 0;
             break;

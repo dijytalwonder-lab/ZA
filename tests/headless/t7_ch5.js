@@ -62,7 +62,9 @@ const { launch, sleep, check, summary } = require('./lib');
   await G(() => { const s = window.__GAME.G.stage; const z = s.enemies[7]; z.wp = null; s.makeNoise(z.pos.x + 3, z.pos.z, 8); });
   await sleep(300);
   check('noise makes an idle zombie INVESTIGATE', (await G(() => window.__GAME.G.stage.enemies[7].state)) === 'investigate');
-  await tp(-70, 0); await sleep(10500);
+  // stand 40 m away (inside the 75 m active range, out of sight): enemies further than that are frozen, which made this check depend on where the zombie wandered to
+  await G(() => { const z = window.__GAME.G.stage.enemies[7], p = window.__GAME.G.player; p.pos.set(z.pos.x - 40, 0, z.pos.z); p.vx = p.vz = 0; });
+  await sleep(10500);
   check('investigating zombie gives up and goes back to idle', (await G(() => window.__GAME.G.stage.enemies[7].state)) === 'idle', await G(() => window.__GAME.G.stage.enemies[7].state));
 
   // ---------- hiding ----------
@@ -159,7 +161,10 @@ const { launch, sleep, check, summary } = require('./lib');
     return { hp: z.hp };
   });
   await sleep(250);
+  // centred pellets (Math.random = 0.5 -> zero spread): the random 7-pellet spread otherwise leaves only 2-4 pellets on target at 5 m, so the check was a coin flip
+  await G(() => { window.__rnd = Math.random; Math.random = () => 0.5; });
   await t.key('KeyF', 40); await sleep(350);
+  await G(() => { Math.random = window.__rnd; });
   const sgr = await G(() => { const s = window.__GAME.G.stage, p = window.__GAME.G.player; const z = s.enemies[s.enemies.length - 1]; return { shells: p.inv.shells, before: p.shellsBefore, hp: z.hp }; });
   check('shotgun fires 1 shell and hits with multiple pellets', sgr.shells === sgr.before - 1 && sgr.hp < sg.hp - 30, JSON.stringify(sgr) + ' start ' + sg.hp);
   await t.shot('66_shotgun');
